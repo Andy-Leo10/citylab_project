@@ -23,7 +23,7 @@ private:
     //move to the safe distance
     move_.linear.x = this->linear_x;
     this->angular_z = direction_ * 0.5;
-    move_.angular.z = this->angular_z;
+    move_.angular.z = -this->angular_z;
     publisher_->publish(move_);
   }
   void determine_MaxDistance_MaxIndex()
