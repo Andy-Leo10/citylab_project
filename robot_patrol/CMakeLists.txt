@@ -35,7 +35,7 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
-add_executable(patrolling_node src/neo_avoids.cpp)
+add_executable(patrolling_node src/patrol.cpp)
 ament_target_dependencies(patrolling_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs)
 install(TARGETS
    patrolling_node
