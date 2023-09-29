@@ -13,7 +13,7 @@ public:
     publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
     laser_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "scan", 10, std::bind(&Patrol::laser_callback, this, _1));
-    timer_ = this->create_wall_timer(100ms, std::bind(&RobotNeo::timer_callback, this));
+    timer_ = this->create_wall_timer(100ms, std::bind(&Patrol::timer_callback, this));
   }
 
 private:
