@@ -2,6 +2,7 @@
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include <cmath>
+#include <chrono>
 using std::placeholders::_1;
 
 class Patrol : public rclcpp::Node
@@ -12,6 +13,7 @@ public:
     publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
     laser_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "scan", 10, std::bind(&Patrol::laser_callback, this, _1));
+    timer_ = this->create_wall_timer(100ms, std::bind(&RobotNeo::timer_callback, this));
   }
 
 private:
@@ -20,11 +22,6 @@ private:
     data_laser_ = msg;
     determine_MaxDistance_MaxIndex();
     RCLCPP_INFO(this->get_logger(), "Distance[m]: %f, Direction[°]: %f", distance_, direction_ * 180 / M_PI);
-    //move to the safe distance
-    move_.linear.x = this->linear_x;
-    this->angular_z = direction_ * 0.5;
-    move_.angular.z = this->angular_z;
-    publisher_->publish(move_);
   }
   void determine_MaxDistance_MaxIndex()
   {
@@ -43,6 +40,14 @@ private:
     //laser readings are from 0 to 719 rays, direction is from -pi/2 to pi/2
     direction_=(M_PI/720)*max_index-M_PI/2;
   }
+  void timer_callback()
+  {
+    //move to the safe distance
+    move_.linear.x = this->linear_x;
+    this->angular_z = direction_ * 0.5;
+    move_.angular.z = this->angular_z;
+    publisher_->publish(move_);
+  }
 
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
   geometry_msgs::msg::Twist move_;
@@ -52,6 +57,7 @@ private:
   sensor_msgs::msg::LaserScan::SharedPtr data_laser_;
   float distance_ = 0;
   float direction_ = 0;
+  rclcpp::TimerBase::SharedPtr timer_;
 };
 
 int main(int argc, char *argv[])
