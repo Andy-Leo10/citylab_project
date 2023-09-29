@@ -20,6 +20,10 @@ private:
     data_laser_ = msg;
     determine_MaxDistance_MaxIndex();
     RCLCPP_INFO(this->get_logger(), "Distance: %f, Direction: %f", distance_, direction_);
+    //move to the safe distance
+    move_.linear.x = this->linear_x;
+    this->angular_z = direction_ * 0.5;
+    move_.angular.z = this->angular_z;
   }
   void determine_MaxDistance_MaxIndex()
   {
@@ -40,7 +44,7 @@ private:
   }
 
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
-  geometry_msgs::msg::Twist move;
+  geometry_msgs::msg::Twist move_;
   float linear_x=0.1;
   float angular_z=0;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr laser_subscription_;
