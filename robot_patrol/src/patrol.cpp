@@ -19,7 +19,7 @@ private:
   {
     data_laser_ = msg;
     determine_MaxDistance_MaxIndex();
-    RCLCPP_INFO(this->get_logger(), "Distance: %f, Direction: %f", distance_, direction_);
+    RCLCPP_INFO(this->get_logger(), "Distance[m]: %f, Direction[°]: %f", distance_, direction_ * 180 / M_PI);
     //move to the safe distance
     move_.linear.x = this->linear_x;
     this->angular_z = direction_ * 0.5;
