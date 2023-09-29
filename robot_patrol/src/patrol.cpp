@@ -33,7 +33,7 @@ private:
     size_t max_index = 0;
     for (size_t i = 0; i < data_laser_->ranges.size(); i++)
     {
-      if (data_laser_->ranges[i] > max_distance && data_laser_->ranges[i] < 10)
+      if (data_laser_->ranges[i] > max_distance && data_laser_->ranges[i] < 3.0)
       {
         max_distance = data_laser_->ranges[i];
         max_index = i;
