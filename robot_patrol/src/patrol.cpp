@@ -58,10 +58,10 @@ private:
         this->angular_z = direction_ * 0.5;
         
         //for the closest distance turn in the opposite direction
-        if (closest_distance_ < 0.5)
+        if (closest_distance_ < 0.3)
         {
             //modify the direction
-            move_.angular.z = -closest_direction_ * 0.5;
+            move_.angular.z = -closest_direction_ * 2;
         }
         else
         {
