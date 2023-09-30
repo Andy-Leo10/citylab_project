@@ -22,8 +22,8 @@ private:
     {
         data_laser_ = msg;
         determine_MaxDistance_MaxIndex();
-        RCLCPP_INFO(this->get_logger(), "Distance[m]: %f, Direction[°]: %f", distance_, direction_ * 180 / M_PI);
-        RCLCPP_INFO(this->get_logger(), "Closest [m]: %f, Closest  [°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
+        RCLCPP_INFO(this->get_logger(), "Further[m]: %f, Further[°]: %f", distance_, direction_ * 180 / M_PI);
+        RCLCPP_INFO(this->get_logger(), "Closest[m]: %f, Closest[°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
     }
     void determine_MaxDistance_MaxIndex()
     {
