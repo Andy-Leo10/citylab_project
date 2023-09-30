@@ -23,6 +23,7 @@ private:
         data_laser_ = msg;
         determine_MaxDistance_MaxIndex();
         RCLCPP_INFO(this->get_logger(), "Distance[m]: %f, Direction[°]: %f", distance_, direction_ * 180 / M_PI);
+        RCLCPP_INFO(this->get_logger(), "Closest [m]: %f, Closest  [°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
     }
     void determine_MaxDistance_MaxIndex()
     {
@@ -55,12 +56,16 @@ private:
         // move following the algorithm
         move_.linear.x = this->linear_x;
         this->angular_z = direction_ * 0.5;
-        move_.angular.z = this->angular_z;
+        
         //for the closest distance turn in the opposite direction
         if (closest_distance_ < 0.5)
         {
             //modify the direction
             move_.angular.z = -closest_direction_ * 0.5;
+        }
+        else
+        {
+            move_.angular.z = this->angular_z;
         }
         publisher_->publish(move_);
     }
