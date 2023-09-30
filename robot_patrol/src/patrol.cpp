@@ -59,7 +59,7 @@ private:
         //for the closest distance turn in the opposite direction
         if (closest_distance_ < 0.5)
         {
-            move_.linear.x = 0;
+            //modify the direction
             move_.angular.z = -closest_direction_ * 0.5;
         }
         publisher_->publish(move_);
