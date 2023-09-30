@@ -54,17 +54,20 @@ private:
     void timer_callback()
     {
         // move following the algorithm
-        move_.linear.x = this->linear_x;
-        this->angular_z = direction_ * 0.5;
+        
+        
         
         //for the closest distance turn in the opposite direction
-        if (closest_distance_ < 0.3)
+        if (closest_distance_ < 0.23)
         {
+            move_.linear.x = this->linear_x;
             //modify the direction
-            move_.angular.z = -closest_direction_ * 2;
+            move_.angular.z = -closest_direction_ * 0.25;
         }
         else
         {
+            move_.linear.x = this->linear_x;
+            this->angular_z = direction_ * 0.5;
             move_.angular.z = this->angular_z;
         }
         publisher_->publish(move_);
