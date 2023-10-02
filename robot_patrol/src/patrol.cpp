@@ -3,6 +3,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include <cmath>
 #include <chrono>
+#include <iostream>
 using std::placeholders::_1;
 using namespace std::chrono_literals;
 
@@ -52,6 +53,7 @@ private:
         closest_distance_ = min_distance;
         // we remap the index of interest to the range of -pi to pi
         direction_ = (M_PI / 360) * max_index - M_PI;
+        RCLCPP_INFO(this->get_logger(), "direction: %f", direction_);
         closest_direction_ = (M_PI / 360) * min_index - M_PI;
     }
     void timer_callback()
@@ -66,7 +68,7 @@ private:
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
     geometry_msgs::msg::Twist move_;
     float linear_x = 0.1;
-    float angular_z = 0;
+    float angular_z = 0.05;
     rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr laser_subscription_;
     sensor_msgs::msg::LaserScan::SharedPtr data_laser_;
     float distance_ = 0;
