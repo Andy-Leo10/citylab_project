@@ -45,14 +45,59 @@ private:
         // we remap the index of interest to the range of -pi to pi
         direction_ = (M_PI / 720) * max_index - M_PI / 2;
     }
+
+    void check_angular_z()
+    {
+        // it is a saturation function for the angular velocity from [-pi/2;pi/2]
+        if (this->angular_z > M_PI / 2)
+            this->angular_z = M_PI / 2;
+        else if (this->angular_z < -M_PI / 2)
+            this->angular_z = -M_PI / 2;
+    }
+
+    void check_spaces(){
+        // check if there is enough space on the left
+        for (size_t i = 361; i < 495; i++)
+        {
+            if (data_laser_->ranges[i] < SAFE_BUBBLE)
+            {
+                space_left_ = false;
+                break;
+            }
+            else
+                space_left_ = true;
+        }
+        // check if there is enough space on the right
+        for (size_t i = 225; i < 359; i++)
+        {
+            if (data_laser_->ranges[i] < SAFE_BUBBLE)
+            {
+                space_right_ = false;
+                break;
+            }
+            else
+                space_right_ = true;
+        }
+    }
+
     void timer_callback()
     {
-        // move following the algorithm
+        check_spaces();
         move_.linear.x = this->linear_x;
-        this->angular_z = direction_ * 0.5;
-        move_.angular.z = this->angular_z;
+        // if there is no enough space on the left
+        if (!space_left_)
+            this->angular_z = this->angular_z - variation_;
+        // if there is no enough space on the right
+        else if (!space_right_)
+            this->angular_z = this->angular_z + variation_;
+        // else // move following the algorithm
+        else
+        {
+            this->angular_z = direction_ * 0.5;
+            move_.angular.z = this->angular_z;
+        }
+        check_angular_z();
         publisher_->publish(move_);
-
     }
 
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
@@ -64,6 +109,10 @@ private:
     float distance_ = 0;
     float direction_ = 0;
     rclcpp::TimerBase::SharedPtr timer_;
+    const float SAFE_BUBBLE = 0.3;
+    bool space_left_ = true;
+    bool space_right_ = true;
+    float variation_ = 0.1;
 };
 
 int main(int argc, char *argv[])
