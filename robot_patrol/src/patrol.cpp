@@ -32,9 +32,12 @@ private:
         size_t max_index = 0;
         float min_distance = 100;
         size_t min_index = 0;
-        for (size_t i = 0; i < data_laser_->ranges.size(); i++)
+        //this robot has a 360 degree laser scanner, the ranges size is 720
+        //the angle of the rays go from -pi to pi
+        //but we want to see only the front of the robot, so ...
+        for (size_t i = 359; i < 540; i++)
         {
-            RCLCPP_INFO(this->get_logger(),"quantity of ranges: %d", data_laser_->ranges.size());
+            RCLCPP_INFO(this->get_logger(), "quantity of ranges: %d", data_laser_->ranges.size());
             if (data_laser_->ranges[i] > max_distance && data_laser_->ranges[i] < 2.3)
             {
                 max_distance = data_laser_->ranges[i];
@@ -47,30 +50,17 @@ private:
             }
         }
         distance_ = max_distance;
-        // laser readings are from 0 to 719 rays, direction is from -pi/2 to pi/2
-        direction_ = (M_PI / 720) * max_index - M_PI / 2;
         closest_distance_ = min_distance;
-        closest_direction_ = (M_PI / 720) * min_index - M_PI / 2;
+        // we remap the index of interest to the range of -pi to pi
+        direction_ = (M_PI / 360) * max_index - M_PI;
+        closest_direction_ = (M_PI / 360) * min_index - M_PI;
     }
     void timer_callback()
     {
         // move following the algorithm
-        
-        
-        
-        //for the closest distance turn in the opposite direction
-        if (closest_distance_ < 0.23)
-        {
-            move_.linear.x = this->linear_x;
-            //modify the direction
-            move_.angular.z = -closest_direction_ * 0.25;
-        }
-        else
-        {
-            move_.linear.x = this->linear_x;
-            this->angular_z = direction_ * 0.5;
-            move_.angular.z = this->angular_z;
-        }
+        move_.linear.x = this->linear_x;
+        this->angular_z = direction_ * 0.5;
+        move_.angular.z = this->angular_z;
         publisher_->publish(move_);
     }
 
