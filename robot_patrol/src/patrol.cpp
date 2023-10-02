@@ -37,7 +37,6 @@ private:
         //but we want to see only the front of the robot, so ...
         for (size_t i = 359; i < 540; i++)
         {
-            RCLCPP_INFO(this->get_logger(), "quantity of ranges: %d", data_laser_->ranges.size());
             if (data_laser_->ranges[i] > max_distance && data_laser_->ranges[i] < 2.3)
             {
                 max_distance = data_laser_->ranges[i];
