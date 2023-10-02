@@ -57,7 +57,7 @@ private:
 
     void check_spaces(){
         // check if there is enough space on the left
-        for (size_t i = 361; i < 495; i++)
+        for (size_t i = 361; i < 461; i++)
         {
             if (data_laser_->ranges[i] < SAFE_BUBBLE)
             {
@@ -68,7 +68,7 @@ private:
                 space_left_ = true;
         }
         // check if there is enough space on the right
-        for (size_t i = 225; i < 359; i++)
+        for (size_t i = 269; i < 359; i++)
         {
             if (data_laser_->ranges[i] < SAFE_BUBBLE)
             {
@@ -109,10 +109,10 @@ private:
     float distance_ = 0;
     float direction_ = 0;
     rclcpp::TimerBase::SharedPtr timer_;
-    const float SAFE_BUBBLE = 0.3;
+    const float SAFE_BUBBLE = 0.22;
     bool space_left_ = true;
     bool space_right_ = true;
-    float variation_ = 0.1;
+    float variation_ = 0.2;
 };
 
 int main(int argc, char *argv[])
