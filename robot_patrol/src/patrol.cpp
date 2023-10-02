@@ -33,9 +33,9 @@ private:
         size_t max_index = 0;
         float min_distance = 100;
         size_t min_index = 0;
-        //this robot has a 360 degree laser scanner, the ranges size is 720
-        //the angle of the rays go from -pi to pi
-        //but we want to see only the front of the robot, so ...
+        // this robot has a 360 degree laser scanner, the ranges size is 720
+        // the angle of the rays go from -pi to pi
+        // but we want to see only the front of the robot, so ...
         for (size_t i = 179; i < 540; i++)
         {
             if (data_laser_->ranges[i] > max_distance && data_laser_->ranges[i] < 2.4)
@@ -52,16 +52,28 @@ private:
         distance_ = max_distance;
         closest_distance_ = min_distance;
         // we remap the index of interest to the range of -pi to pi
-        direction_ = (M_PI / 720) * max_index - M_PI/2;
-        closest_direction_ = (M_PI / 720) * min_index - M_PI/2;
+        direction_ = (M_PI / 720) * max_index - M_PI / 2;
+        closest_direction_ = (M_PI / 720) * min_index - M_PI / 2;
     }
     void timer_callback()
     {
-        // move following the algorithm
-        move_.linear.x = this->linear_x;
-        this->angular_z = direction_ * 0.5;
-        move_.angular.z = this->angular_z;
-        publisher_->publish(move_);
+        // if frontal distance is less than 0.25m do the algorithm
+        if (data_laser_->ranges[359] > 0.25)
+        {
+            // move following the algorithm
+            move_.linear.x = this->linear_x;
+            this->angular_z = direction_ * 0.5;
+            move_.angular.z = this->angular_z;
+            publisher_->publish(move_);
+        }
+        // else correct the direction, knowing the closest direction
+        else
+        {
+            move_.linear.x = this->linear_x;
+            this->angular_z = -closest_direction_ * 0.5;
+            move_.angular.z = this->angular_z;
+            publisher_->publish(move_);
+        }
     }
 
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
