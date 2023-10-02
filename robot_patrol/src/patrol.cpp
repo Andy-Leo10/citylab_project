@@ -57,8 +57,9 @@ private:
     }
     void timer_callback()
     {
-        // if frontal distance is less than 0.25m do the algorithm
-        if (data_laser_->ranges[359] > 0.25)
+        // if frontal distance is more than 0.25m and closest distance is more than 0.12m 
+        //do the algorithm
+        if (distance_ > 0.25 && closest_distance_ > 0.12)
         {
             // move following the algorithm
             move_.linear.x = this->linear_x;
