@@ -59,7 +59,7 @@ private:
     {
         // if frontal distance is more than 0.25m and closest distance is more than 0.12m 
         //do the algorithm
-        if (distance_ > 0.25 && closest_distance_ > 0.12)
+        if (data_laser_->ranges[360] > 0.3)
         {
             // move following the algorithm
             move_.linear.x = this->linear_x;
