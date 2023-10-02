@@ -22,14 +22,9 @@ private:
     void laser_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
     {
         data_laser_ = msg;
-        //we print 4 rays of the laser scanner
-        RCLCPP_INFO(this->get_logger(), "Ray[0]: %f", data_laser_->ranges[0]);
-        RCLCPP_INFO(this->get_logger(), "Ray[180]: %f", data_laser_->ranges[180]);
-        RCLCPP_INFO(this->get_logger(), "Ray[360]: %f", data_laser_->ranges[360]);
-        RCLCPP_INFO(this->get_logger(), "Ray[540]: %f", data_laser_->ranges[540]);
-        //determine_MaxDistance_MaxIndex();
-        //RCLCPP_INFO(this->get_logger(), "Further[m]: %f, Further[°]: %f", distance_, direction_ * 180 / M_PI);
-        //RCLCPP_INFO(this->get_logger(), "Closest[m]: %f, Closest[°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
+        determine_MaxDistance_MaxIndex();
+        RCLCPP_INFO(this->get_logger(), "Further[m]: %f, Further[°]: %f", distance_, direction_ * 180 / M_PI);
+        RCLCPP_INFO(this->get_logger(), "Closest[m]: %f, Closest[°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
     }
     void determine_MaxDistance_MaxIndex()
     {
@@ -41,14 +36,14 @@ private:
         //this robot has a 360 degree laser scanner, the ranges size is 720
         //the angle of the rays go from -pi to pi
         //but we want to see only the front of the robot, so ...
-        for (size_t i = 359; i < 540; i++)
+        for (size_t i = 179; i < 540; i++)
         {
-            if (data_laser_->ranges[i] > max_distance && data_laser_->ranges[i] < 2.3)
+            if (data_laser_->ranges[i] > max_distance && data_laser_->ranges[i] < 2.4)
             {
                 max_distance = data_laser_->ranges[i];
                 max_index = i;
             }
-            if (data_laser_->ranges[i] < min_distance && data_laser_->ranges[i] > 0.1)
+            if (data_laser_->ranges[i] < min_distance && data_laser_->ranges[i] > 0.12)
             {
                 min_distance = data_laser_->ranges[i];
                 min_index = i;
@@ -57,9 +52,8 @@ private:
         distance_ = max_distance;
         closest_distance_ = min_distance;
         // we remap the index of interest to the range of -pi to pi
-        direction_ = (M_PI / 360) * max_index - M_PI;
-        RCLCPP_DEBUG(this->get_logger(), "angular_z: %f", direction_*0.5);
-        closest_direction_ = (M_PI / 360) * min_index - M_PI;
+        direction_ = (M_PI / 720) * max_index - M_PI/2;
+        closest_direction_ = (M_PI / 720) * min_index - M_PI/2;
     }
     void timer_callback()
     {
