@@ -34,6 +34,7 @@ private:
         size_t min_index = 0;
         for (size_t i = 0; i < data_laser_->ranges.size(); i++)
         {
+            RCLCPP_INFO(this->get_logger(),"quantity of ranges: %d", data_laser_->ranges.size());
             if (data_laser_->ranges[i] > max_distance && data_laser_->ranges[i] < 2.3)
             {
                 max_distance = data_laser_->ranges[i];
