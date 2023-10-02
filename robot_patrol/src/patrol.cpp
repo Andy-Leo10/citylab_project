@@ -24,12 +24,15 @@ private:
         data_laser_ = msg;
         determine_MaxDistance_MaxIndex();
         RCLCPP_INFO(this->get_logger(), "Further[m]: %f, Further[°]: %f", distance_, direction_ * 180 / M_PI);
+        RCLCPP_INFO(this->get_logger(), "Closest[m]: %f, Closest[°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
     }
     void determine_MaxDistance_MaxIndex()
     {
         // Identify the largest distance ray, which is not inf
         float max_distance = 0;
         size_t max_index = 0;
+        float min_distance = 100;
+        size_t min_index = 0;
         // this robot has a 360 degree laser scanner, the ranges size is 720
         // the angle of the rays go from -pi to pi
         // but we want to see only the front of the robot, so ...
@@ -40,10 +43,17 @@ private:
                 max_distance = data_laser_->ranges[i];
                 max_index = i;
             }
+            if (data_laser_->ranges[i] < min_distance && data_laser_->ranges[i] > 0.12)
+            {
+                min_distance = data_laser_->ranges[i];
+                min_index = i;
+            }
         }
         distance_ = max_distance;
+        closest_distance_ = min_distance;
         // we remap the index of interest to the range of -pi to pi
         direction_ = (M_PI / 720) * max_index - M_PI / 2;
+        closest_direction_ = (M_PI / 720) * min_index - M_PI / 2;
     }
 
     void check_angular_z()
@@ -84,16 +94,21 @@ private:
     {
         check_spaces();
         move_.linear.x = this->linear_x;
+        // if there is no obstacle in front of the robot
+        // move following the algorithm
+        if(space_left_ && space_right_)
+            this->angular_z = direction_ * 0.5;
+            move_.angular.z = this->angular_z;
         // if there is no enough space on the left
-        if (!space_left_)
+        if (!space_left_ && space_right_)
             this->angular_z = this->angular_z - variation_;
         // if there is no enough space on the right
-        else if (!space_right_)
+        else if (!space_right_ && space_left_)
             this->angular_z = this->angular_z + variation_;
-        // else // move following the algorithm
+        // else use the closest obstacle as turning referece
         else
         {
-            this->angular_z = direction_ * 0.5;
+            this->angular_z = -closest_direction_ * 0.5;
             move_.angular.z = this->angular_z;
         }
         check_angular_z();
@@ -108,6 +123,8 @@ private:
     sensor_msgs::msg::LaserScan::SharedPtr data_laser_;
     float distance_ = 0;
     float direction_ = 0;
+    float closest_distance_ = 100;
+    float closest_direction_ = 0;
     rclcpp::TimerBase::SharedPtr timer_;
     const float SAFE_BUBBLE = 0.22;
     bool space_left_ = true;
