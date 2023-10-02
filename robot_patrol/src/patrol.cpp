@@ -22,9 +22,14 @@ private:
     void laser_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
     {
         data_laser_ = msg;
-        determine_MaxDistance_MaxIndex();
-        RCLCPP_INFO(this->get_logger(), "Further[m]: %f, Further[°]: %f", distance_, direction_ * 180 / M_PI);
-        RCLCPP_INFO(this->get_logger(), "Closest[m]: %f, Closest[°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
+        //we print 4 rays of the laser scanner
+        RCLCPP_INFO(this->get_logger(), "Ray[0]: %f", data_laser_->ranges[0]);
+        RCLCPP_INFO(this->get_logger(), "Ray[180]: %f", data_laser_->ranges[180]);
+        RCLCPP_INFO(this->get_logger(), "Ray[360]: %f", data_laser_->ranges[360]);
+        RCLCPP_INFO(this->get_logger(), "Ray[540]: %f", data_laser_->ranges[540]);
+        //determine_MaxDistance_MaxIndex();
+        //RCLCPP_INFO(this->get_logger(), "Further[m]: %f, Further[°]: %f", distance_, direction_ * 180 / M_PI);
+        //RCLCPP_INFO(this->get_logger(), "Closest[m]: %f, Closest[°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
     }
     void determine_MaxDistance_MaxIndex()
     {
@@ -53,7 +58,7 @@ private:
         closest_distance_ = min_distance;
         // we remap the index of interest to the range of -pi to pi
         direction_ = (M_PI / 360) * max_index - M_PI;
-        RCLCPP_INFO(this->get_logger(), "direction: %f", direction_);
+        RCLCPP_DEBUG(this->get_logger(), "angular_z: %f", direction_*0.5);
         closest_direction_ = (M_PI / 360) * min_index - M_PI;
     }
     void timer_callback()
