@@ -66,6 +66,9 @@ private:
     }
 
     void check_spaces(){
+        //supposing there is free spaces
+        space_left_ = true;
+        space_right_ = true;
         // check if there is enough space on the left
         for (size_t i = 361; i < 461; i++)
         {
@@ -74,19 +77,18 @@ private:
                 space_left_ = false;
                 break;
             }
-            else
-                space_left_ = true;
         }
-        // check if there is enough space on the right
-        for (size_t i = 269; i < 359; i++)
+        if(space_left_)
         {
-            if (data_laser_->ranges[i] < SAFE_BUBBLE)
+            // check if there is enough space on the right
+            for (size_t i = 269; i < 359; i++)
             {
-                space_right_ = false;
-                break;
+                if (data_laser_->ranges[i] < SAFE_BUBBLE)
+                {
+                    space_right_ = false;
+                    break;
+                }
             }
-            else
-                space_right_ = true;
         }
     }
 
@@ -104,20 +106,14 @@ private:
         // if there is no enough space on the left
         else if (!space_left_ && space_right_)
         {
-            this->angular_z = this->angular_z + variation_;
+            this->angular_z = this->angular_z - variation_;
             RCLCPP_INFO(this->get_logger(), "case 2 - to right");
         }
         // if there is no enough space on the right
         else if (!space_right_ && space_left_)
         {
-            this->angular_z = this->angular_z - variation_;
+            this->angular_z = this->angular_z + variation_;
             RCLCPP_INFO(this->get_logger(), "case 3 - to left");
-        }
-        // else use the closest obstacle as turning reference
-        else
-        {
-            this->angular_z = -closest_direction_ * 1.5;
-            RCLCPP_INFO(this->get_logger(), "case 4 - depending on closest");
         }
         check_angular_z();
         move_.angular.z = this->angular_z;
@@ -135,7 +131,7 @@ private:
     float closest_distance_ = 100;
     float closest_direction_ = 0;
     rclcpp::TimerBase::SharedPtr timer_;
-    const float SAFE_BUBBLE = 0.4;
+    const float SAFE_BUBBLE = 0.22;
     bool space_left_ = true;
     bool space_right_ = true;
     float variation_ = 0.7;
