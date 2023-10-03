@@ -23,8 +23,8 @@ private:
     {
         data_laser_ = msg;
         determine_MaxDistance_MaxIndex();
-        RCLCPP_INFO(this->get_logger(), "Further[m]: %f, Further[°]: %f", distance_, direction_ * 180 / M_PI);
-        RCLCPP_INFO(this->get_logger(), "Closest[m]: %f, Closest[°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
+        //RCLCPP_INFO(this->get_logger(), "Further[m]: %f, Further[°]: %f", distance_, direction_ * 180 / M_PI);
+        //RCLCPP_INFO(this->get_logger(), "Closest[m]: %f, Closest[°]: %f", closest_distance_, closest_direction_ * 180 / M_PI);
     }
     void determine_MaxDistance_MaxIndex()
     {
@@ -97,21 +97,30 @@ private:
         // if there is no obstacle in front of the robot
         // move following the algorithm
         if(space_left_ && space_right_)
+        {
             this->angular_z = direction_ * 0.5;
-            move_.angular.z = this->angular_z;
+            RCLCPP_INFO(this->get_logger(), "case 1 - far away");
+        }
         // if there is no enough space on the left
-        if (!space_left_ && space_right_)
-            this->angular_z = this->angular_z - variation_;
+        else if (!space_left_ && space_right_)
+        {
+            this->angular_z = this->angular_z + variation_;
+            RCLCPP_INFO(this->get_logger(), "case 2 - to right");
+        }
         // if there is no enough space on the right
         else if (!space_right_ && space_left_)
-            this->angular_z = this->angular_z + variation_;
-        // else use the closest obstacle as turning referece
+        {
+            this->angular_z = this->angular_z - variation_;
+            RCLCPP_INFO(this->get_logger(), "case 3 - to left");
+        }
+        // else use the closest obstacle as turning reference
         else
         {
-            this->angular_z = -closest_direction_ * 0.5;
-            move_.angular.z = this->angular_z;
+            this->angular_z = -closest_direction_ * 1.5;
+            RCLCPP_INFO(this->get_logger(), "case 4 - depending on closest");
         }
         check_angular_z();
+        move_.angular.z = this->angular_z;
         publisher_->publish(move_);
     }
 
@@ -126,10 +135,10 @@ private:
     float closest_distance_ = 100;
     float closest_direction_ = 0;
     rclcpp::TimerBase::SharedPtr timer_;
-    const float SAFE_BUBBLE = 0.22;
+    const float SAFE_BUBBLE = 0.4;
     bool space_left_ = true;
     bool space_right_ = true;
-    float variation_ = 0.2;
+    float variation_ = 0.7;
 };
 
 int main(int argc, char *argv[])
