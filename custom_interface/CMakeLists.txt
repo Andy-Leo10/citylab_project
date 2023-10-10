@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(robot_patrol)
+project(custom_interface)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -19,11 +19,15 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(nav_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(action_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(tf2 REQUIRED)
-find_package(custom_interface REQUIRED)
+find_package(nav_msgs REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/GetDirection.srv"
+  "action/GoToPose.action"
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -37,16 +41,3 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
-#cp5
-add_executable(patrolling_node src/patrol.cpp)
-ament_target_dependencies(patrolling_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs)
-#cp6
-install(TARGETS
-   patrolling_node
-   DESTINATION lib/${PROJECT_NAME}
-)
-
-install(DIRECTORY
-  launch
-  DESTINATION share/${PROJECT_NAME}/
-)
