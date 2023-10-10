@@ -41,8 +41,11 @@ ament_package()
 add_executable(patrolling_node src/patrol.cpp)
 ament_target_dependencies(patrolling_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs)
 #cp6
+add_executable(direction_service_node src/direction_service.cpp)
+ament_target_dependencies(direction_service_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs tf2 custom_interface)
 install(TARGETS
    patrolling_node
+   direction_service_node
    DESTINATION lib/${PROJECT_NAME}
 )
 
