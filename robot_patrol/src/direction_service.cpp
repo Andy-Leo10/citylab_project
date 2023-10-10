@@ -1,10 +1,10 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
-#include "custom_interfaces/srv/direction_service.hpp"
+#include "custom_interface/srv/get_direction.hpp"
 
 #include <memory>
 
-using GetDirection = custom_interfaces::srv::GetDirection;
+using GetDirection = custom_interface::srv::GetDirection;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -23,7 +23,7 @@ private:
     rclcpp::Service<GetDirection>::SharedPtr srv_;
     float MAX_DIST;
     std::string direction_;
-    auto laser_data_ = sensor_msgs::msg::LaserScan();
+    sensor_msgs::msg::LaserScan laser_data_;
     float total_dist_sec_right;
     float total_dist_sec_front;
     float total_dist_sec_left;
