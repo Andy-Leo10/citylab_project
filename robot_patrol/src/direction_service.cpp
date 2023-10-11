@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     auto server_node = std::make_shared<DirectionService>(); // create node
     rcutils_logging_set_logger_level(server_node->get_logger().get_name(), RCUTILS_LOG_SEVERITY_DEBUG);
     RCLCPP_DEBUG(server_node->get_logger(), "SERVICE = /direction_service");
-    RCLCPP_INFO(server_node->get_logger(), "FOR TEST USE = ros2 service call /direction_service custom_interface/srv/GetDirection \"{direction: 'right', angular_velocity: 1.0, time: 5}\"");
+    RCLCPP_INFO(server_node->get_logger(), "FOR TEST USE = ros2 service call /direction_service custom_interface/srv/GetDirection \"{variable: 'value'}\"");
     rclcpp::spin(server_node);
     rclcpp::shutdown();
     return 0;

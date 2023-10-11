@@ -6,6 +6,7 @@
 
 using namespace std::chrono_literals;
 using GetDirection = custom_interface::srv::GetDirection;
+using std::placeholders::_1;
 
 class TestService : public rclcpp::Node
 {
@@ -49,7 +50,7 @@ private:
         }
 
         auto request = std::make_shared<GetDirection::Request>();
-        request->laser_data = data_laser_;
+        request->laser_data = *data_laser_;
 
         service_done_ = false;
         auto result_future = client_->async_send_request(
@@ -72,7 +73,7 @@ private:
             RCLCPP_ERROR(this->get_logger(), "Service call failed to finish properly");
             direction_ = "Fail";
         }
-        RCLCPP_INFO(this->get_logger(), "DIRECTION to follow: %s", direction_);
+        RCLCPP_INFO(this->get_logger(), "DIRECTION to follow: %s", std::string(direction_).c_str());
     }
 };
 
