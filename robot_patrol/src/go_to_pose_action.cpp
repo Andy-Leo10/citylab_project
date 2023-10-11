@@ -22,11 +22,11 @@ The action server will publish the result when the robot reaches the desired pos
 class MyActionServer : public rclcpp::Node
 {
 public:
-    using DesirePose = actions_quiz_msg::action::GoToPose;
+    using DesirePose = custom_interface::action::GoToPose;
     using GoalHandleDesirePose = rclcpp_action::ServerGoalHandle<DesirePose>;
 
     explicit MyActionServer(const rclcpp::NodeOptions &options = rclcpp::NodeOptions())
-        : Node("go_to_server", options)
+        : Node("go_to_server", options), TOLERANCE_(0.1), MAX_ANGULAR_SPEED_(M_PI / 2)
     {
         using namespace std::placeholders;
 
@@ -42,13 +42,11 @@ public:
         desired_pos_.x = 0.0;
         desired_pos_.y = 0.0;
         desired_pos_.theta = 0.0;
-        TOLERANCE_ = 0.1;
         direction_ = 0.0;
 
         publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
         this->linear_speed = 0.2;
         this->angular_speed = 0.5;
-        MAX_ANGULAR_SPEED_ = M_PI / 2;
     }
 
 private:
@@ -81,8 +79,8 @@ private:
             msg->pose.pose.orientation.z,
             msg->pose.pose.orientation.w);
         tf2::Matrix3x3 m(q);
-        float roll, pitch, yaw;
-        m.getRPY(roll, pitch, yaw);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw, 1);
         // store the current theta
         current_pos_.theta = yaw;
 
@@ -97,7 +95,7 @@ private:
         const rclcpp_action::GoalUUID &uuid,
         std::shared_ptr<const DesirePose::Goal> goal)
     {
-        RCL_CPP_INFO(this->get_logger(), "Received pose goal request with x: %f, y: %f, theta: %f", goal->goal_pos.x, goal->goal_pos.y, goal->goal_pos.theta);
+        RCLCPP_INFO(this->get_logger(), "Received pose goal request with x: %f, y: %f, theta: %f", goal->goal_pos.x, goal->goal_pos.y, goal->goal_pos.theta);
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
@@ -161,10 +159,10 @@ private:
             publisher_->publish(pub_msg_);
 
             // publish feedback
-            feedback->feedback_pos.x = current_pos_.x;
-            feedback->feedback_pos.y = current_pos_.y;
+            feedback->current_pos.x = current_pos_.x;
+            feedback->current_pos.y = current_pos_.y;
             // convert the theta from radians to degrees
-            feedback->feedback_pos.theta = current_pos_.theta * 180 / M_PI;
+            feedback->current_pos.theta = current_pos_.theta * 180 / M_PI;
             goal_handle->publish_feedback(feedback);
 
             // sleep for the time that was defined for the control loop
@@ -191,12 +189,23 @@ int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
     auto action_server = std::make_shared<MyActionServer>();
-    rcutils_logging_set_logger_level(action_server->get_logger().get_name(), RCUTILS_LOG_SEVERITY_DEBUG);
+    rcutils_ret_t ret = rcutils_logging_set_logger_level(action_server->get_logger().get_name(), RCUTILS_LOG_SEVERITY_DEBUG);
+    if (ret != RCUTILS_RET_OK) {
+        std::cout<< "----------------------------handle the error [main CODE]";// handle the error
+    }
     RCLCPP_INFO(action_server->get_logger(), "ACTION = /go_to_pose READY!");
-    RCLCPP_INFO(action_server->get_logger(), "FOR TEST USE = ros2 action send_goal - f / go_to_pose robot_patrol / action / GoToPose \"goal_pos: x : 0.7 y : 0.3 z : 0.0\"");
+    RCLCPP_INFO(action_server->get_logger(), "FOR TEST USE = ros2 action send_goal -f /go_to_pose custom_interface/action/GoToPose \"goal_pos:  x: 0.7 y: 0.3 theta: 0.0\"");
     rclcpp::executors::MultiThreadedExecutor executor;
     executor.add_node(action_server);
     executor.spin();
     rclcpp::shutdown();
     return 0;
 }
+
+/*
+ros2 action send_goal -f /go_to_pose custom_interface/action/GoToPose "goal_pos:
+  x: 0.7
+  y: 0.3
+  theta: 0.0
+"
+*/

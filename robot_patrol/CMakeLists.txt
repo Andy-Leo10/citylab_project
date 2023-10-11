@@ -24,6 +24,7 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(custom_interface REQUIRED)
+find_package(rclcpp_action REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -47,8 +48,8 @@ add_executable(test_service_node src/test_service.cpp)
 ament_target_dependencies(test_service_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs tf2 custom_interface)
 add_executable(main_service_node src/patrol_with_service.cpp)
 ament_target_dependencies(main_service_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs tf2 custom_interface)
-add_executable(action_node src/go_to_pose_action.cpp.cpp)
-ament_target_dependencies(action_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs tf2 custom_interface)
+add_executable(action_node src/go_to_pose_action.cpp)
+ament_target_dependencies(action_node rclcpp std_msgs rclcpp_action geometry_msgs nav_msgs sensor_msgs tf2 custom_interface)
 
 install(TARGETS
    patrolling_node
