@@ -13,9 +13,11 @@
 #include "custom_interface/srv/get_direction.hpp"
 #include <chrono>
 #include <memory>
+#include "geometry_msgs/msg/twist.hpp"
 
 using namespace std::chrono_literals;
 using GetDirection = custom_interface::srv::GetDirection;
+using std::placeholders::_1;
 
 class Patrol : public rclcpp::Node
 {
@@ -113,6 +115,7 @@ private:
             pub_msg_.linear.x = 0.0;
             pub_msg_.angular.z = 0.0;
         }
+        publisher_->publish(pub_msg_);
     }
 };
 
