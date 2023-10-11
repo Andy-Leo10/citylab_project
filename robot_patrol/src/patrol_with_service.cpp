@@ -1,13 +1,3 @@
-//
-//    Remove the computation of the direction_ in the laser callback.
-//    Now, in the laser callback, just store the latest laser message ina class variable named last_laser_
-//    In the control loop, call the service providing the last_laser_ data
-//    Based on the response obtained from the service, assign the following speeds to the robot:
-//        If front then linear.x=0.1 and angular.z=0.0
-//        If left then linear.x=0.1 and angular.z=0.5
-//        If right then linear.x=0.1 and angular.z=-0.5
-//
-
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "custom_interface/srv/get_direction.hpp"

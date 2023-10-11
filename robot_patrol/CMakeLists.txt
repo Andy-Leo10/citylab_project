@@ -47,12 +47,15 @@ add_executable(test_service_node src/test_service.cpp)
 ament_target_dependencies(test_service_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs tf2 custom_interface)
 add_executable(main_service_node src/patrol_with_service.cpp)
 ament_target_dependencies(main_service_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs tf2 custom_interface)
+add_executable(action_node src/go_to_pose_action.cpp.cpp)
+ament_target_dependencies(action_node rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs tf2 custom_interface)
 
 install(TARGETS
    patrolling_node
    direction_service_node
    test_service_node
    main_service_node
+   action_node
    DESTINATION lib/${PROJECT_NAME}
 )
 
