@@ -96,6 +96,9 @@ private:
         std::shared_ptr<const DesirePose::Goal> goal)
     {
         RCLCPP_INFO(this->get_logger(), "Received pose goal request with x: %f, y: %f, theta: %f", goal->goal_pos.x, goal->goal_pos.y, goal->goal_pos.theta);
+        desired_pos_.x = goal->goal_pos.x;
+        desired_pos_.y = goal->goal_pos.y;
+        desired_pos_.theta = goal->goal_pos.theta;
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
@@ -118,10 +121,12 @@ private:
     void execute(const std::shared_ptr<GoalHandleDesirePose> goal_handle)
     {
         RCLCPP_INFO(this->get_logger(), "Executing goal");
-        rclcpp::Rate loop_rate(1); // Hz for each control loop
         auto feedback = std::make_shared<DesirePose::Feedback>();
         auto &goal = goal_handle->get_goal();
         auto result = std::make_shared<DesirePose::Result>();
+        rclcpp::Rate loop_rate(10); // Hz for each control loop
+        int count = 0; // count the number of iterations
+        
         // control loop to achive the desired pose with a tolerance
         while (rclcpp::ok())
         {
@@ -146,26 +151,42 @@ private:
 
             // compute the direction of the vector between the current position and the desired position
             direction_ = atan2(diff_y_, diff_x_);
-            // compute the angular speed
-            this->angular_speed = direction_ * 0.5;
-            // debug info
-            RCLCPP_DEBUG(this->get_logger(), "Current direction: %f", direction_*180/M_PI);
-            RCLCPP_DEBUG(this->get_logger(), "Current theta: %f \n", current_pos_.theta*180/M_PI);
 
+            // debug info
+            RCLCPP_DEBUG(this->get_logger(), "Current direction: %f", direction_ * 180 / M_PI);
+            RCLCPP_DEBUG(this->get_logger(), "Current theta: %f \n", current_pos_.theta * 180 / M_PI);
+
+            // check if the desired position is achieved
+            if (fabs(diff_x_) < TOLERANCE_ && fabs(diff_y_) < TOLERANCE_)
+            {
+                this->linear_speed = 0.0;
+                //compute the angular speed based on the difference between the desired theta and the current theta
+                this->angular_speed = 0.5 * diff_theta_;
+            }
+            else
+            {
+                this->linear_speed = 0.2;
+                // compute the angular speed based on the difference between the direction and the current theta
+                this->angular_speed = 0.5 * (direction_ - current_pos_.theta);
+            }
             // publish the velocity command
             check_angular_speed();
             pub_msg_.linear.x = this->linear_speed;
             pub_msg_.angular.z = this->angular_speed;
             publisher_->publish(pub_msg_);
 
-            // publish feedback
-            feedback->current_pos.x = current_pos_.x;
-            feedback->current_pos.y = current_pos_.y;
-            // convert the theta from radians to degrees
-            feedback->current_pos.theta = current_pos_.theta * 180 / M_PI;
-            goal_handle->publish_feedback(feedback);
+            // publish feedback every 10 iterations
+            if (count % 10 == 0)
+            {
+                feedback->current_pos.x = current_pos_.x;
+                feedback->current_pos.y = current_pos_.y;
+                // convert the theta from radians to degrees
+                feedback->current_pos.theta = current_pos_.theta * 180 / M_PI;
+                goal_handle->publish_feedback(feedback);
+            }
 
-            // sleep for the time that was defined for the control loop
+            // increment the count and sleep for the time that was defined for the control loop
+            count++;
             loop_rate.sleep();
         }
     }
@@ -194,7 +215,7 @@ int main(int argc, char **argv)
         std::cout<< "----------------------------handle the error [main CODE]";// handle the error
     }
     RCLCPP_INFO(action_server->get_logger(), "ACTION = /go_to_pose READY!");
-    RCLCPP_INFO(action_server->get_logger(), "FOR TEST USE = ros2 action send_goal -f /go_to_pose custom_interface/action/GoToPose \"goal_pos:  x: 0.7 y: 0.3 theta: 0.0\"");
+    RCLCPP_INFO(action_server->get_logger(), "FOR TEST USE = ros2 action send_goal -f /go_to_pose custom_interface/action/GoToPose \"goal_pos:  x: 1.0 y: 1.0 theta: 0.0\"");
     rclcpp::executors::MultiThreadedExecutor executor;
     executor.add_node(action_server);
     executor.spin();
