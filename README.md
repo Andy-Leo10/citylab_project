@@ -32,7 +32,7 @@ ros2 launch robot_patrol main.launch.py
 - [x] action 
 ```
 ros2 launch robot_patrol start_gotopose_action.launch.py
-ros2 action send_goal -f /go_to_pose robot_patrol/action/GoToPose "goal_pos:
+ros2 action send_goal -f /go_to_pose custom_interface/action/GoToPose "goal_pos: x: 0.2 y: 0.3 theta: 40.0"
 ```
 ![action](https://github.com/Andy-Leo10/citylab_project/assets/60716487/458bee14-f0f9-4d88-abaa-47358c9ab5dc)
 
